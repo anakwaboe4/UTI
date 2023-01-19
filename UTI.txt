@@ -1,0 +1,129 @@
+UTI Universal TicTacToe interface
+
+basic idea, stateless communication between the GUI en de AI/Engine using console line.
+It is heavely inspired by UCI Universal Chess Interface
+
+3 kind of communication
+- basic commands
+- standard commands
+- erros
+
+basic commands:
+uti: tells the engine it wants to use uti, engine answers with utiok (if not engine taks will be killed by gui)
+isready: check is engine is started engine always answers with readyok
+debug [on | off]: in debug mode the engine can send extra info
+stop: stop the calculating asap
+quit: quit the programm asap
+id: engine must answers with name <x> author <x> ( country <x> << optional)
+	example: name TikTakToe author laurent country belgium
+newgame: stats an empty new game
+pos: set the board to the given state. the board is represented by an array of int and a follup int for player who is on turn.
+	the number in the array corresponds with a player/symbol
+	- is used for an empty square!
+	example:
+	|X|O| |
+	| |X|O|
+	|X|X| |
+	next move is for O
+	so the gui decides that X= player 1 and O = player 2 (doens't really matter)
+	this becomes pos 12--10-11- 2
+	note: this board can never be reached in a game (there are to many X's) but the engine can still analyse it.
+posmoves: set the board by giving a array of moves,player (both represented by ints), devided by ; and after that the array the player who plays the next move
+		[square],[player];[square],[player] [nextplayer]
+		for example you have a standard board square notation<= see standard commads
+		posmoves 5,1;6,2;1,1;2,2;3,2;7,1 2
+		becomes
+		|X|O|O|
+		| |X|O|
+		|X| | |
+		with the next move for O
+		
+info: the engine returns the supported [game] and [extra options] ( see standard commads)
+	
+standard commands:
+the standard commads always have the same format:
+gui :  [game] <square> [extra options]
+engine answers: <square> <score> [notes]
+
+but what can all these value mean:
+square: 
+Is always an int that corresponds with a square on the bord where you want to play a move.
+for a standard games this looks like:
+|1|2|3|
+|4|5|6|
+|7|8|9|
+note: 0 always means no move made 
+for special version look at the documententation.
+
+score:
+this is how the engine evaluates the position.
+this is awlays an int between -100 & 100.
+whereby 100 means player 1 is winning and -100 means player 2 is winning.
+
+game:
+these are the gamemodes for tictactoe (only standard is requerd the rest are optional)
+this needs to be given with every move (this is also a check if the engine is still in the correct mode)
+	- leave empty for a standard game
+	- size <x>X<y>: for a special size board of size x y
+	- eval: gives just an eval score back of the position and always move 0
+	
+extra options (all are optional):
+this needs to be given with every move (this is also a check if the engine is still in the correct mode or the values can change mid game)
+	- winlength: the lenght you need to win (standard = 3)
+	- players: amount of players (standard = 2)
+	- multi [on | off]: allows multithreating 
+	- table [on | off]: allows transpotable 
+	- depth: the calculation depth an engine can reach
+	- level: set the engines playinglevel
+
+notes:
+these are fully optional and if the gui does not understand them it should need to be able to print them and the users should understand
+	
+	- player<X>score: if there are more than 2 players each players need his own score (print for all players)
+	- calctime: the time it took to calculate it
+	- tablehits: the hits from the transpotable
+	- nodes: the calclated nodes (positions)
+	- NNruns: how many time the pos went trew the NN
+	- depth: the reached depth
+
+
+errors:
+if an engine does not understand an command it return an error.
+this has the format
+
+CommandNotKnowError [extra error | try X]
+
+extra error: (all optional)
+the same as with notes is the case here. if the gui does not understand it it wil display it as a string
+basic errors: (these are in case no more info is known)
+	- GamemodeNotSupported // the gamemode is not supported
+	- OptionNotSupported // the extra option is not supported
+	- empty // no additional information
+	detailed errors:
+	- BoardsizeNotSupported // the engine does not support that board size
+	- NegativeDimentia // negative size of board is not supported (and should never be i guess)
+	- OnlyDefaultSize //the egnine only supports default size
+	- EvalNotSupported //"only eval" mode is not supported
+	- NegativeWinlength // negative winlength is not supported (and should never be i guess)
+	- WinlengthNotSupported // the given winlength is not supported
+	- WinlengthBoardsizeMismatch //the current winlength is impossible with the boardsize
+	- OnlyDefaultWinlength //only the default winlength is supported
+	- PlayerCountNotSupported // the given count of players is not supported
+	- LessThen2Players // the game needs at least 2 players
+	- OnlyDefaultPlayerCount // only default playercount supported
+	- MutlithreatingNotSupported // multithreating can't be on
+	- OnlyMultithreating // multithreating can't be off
+	- TranspotableNotSupported // transpotable can't be on
+	- OnlyTranspoTable // transpotable can't be off
+	- DepthNotSupported // depth is not supported
+	- IncorrectDepth // given depth is not supported
+	- NegativeDepth // negative depth is never supported (if not error it is most likly ignored)
+	- LevelNotSupported // levels are not supported
+	- IncorrectLevel // this level value is not supported
+
+try <X>: (fully optional)
+this returns a setting that might work: in the format
+settingName=<setting value>
+example: CommandNotKnowError WinlengtNotSupported try winlengt=5
+but: CommandNotKnowError WinlengtNotSupported is also possible and even CommandNotKnowError OptionNotSupported or even CommandNotKnowError are allowed for this kind of error
+
