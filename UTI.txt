@@ -26,7 +26,7 @@ pos: set the board to the given state. the board is represented by an array of i
 	|X|X| |
 	next move is for O
 	so the gui decides that X= player 1 and O = player 2 (doens't really matter)
-	this becomes pos 12--10-11- 2
+	this becomes pos 12--12-11- 2
 	note: this board can never be reached in a game (there are to many X's) but the engine can still analyse it.
 posmoves: set the board by giving a array of moves,player (both represented by ints), devided by ; and after that the array the player who plays the next move
 		[square],[player];[square],[player] [nextplayer]
@@ -120,6 +120,7 @@ basic errors: (these are in case no more info is known)
 	- NegativeDepth // negative depth is never supported (if not error it is most likly ignored)
 	- LevelNotSupported // levels are not supported
 	- IncorrectLevel // this level value is not supported
+	- SetboardIncorrect // the board string is incorrect
 
 try <X>: (fully optional)
 this returns a setting that might work: in the format
